@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الانتساب الاحترافية | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;1000&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f0c29;
+            --accent: #ffc107;
+            --purple-glow: #7000ff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --success: #00f2fe; /* لون فيروزي عصري */
+            --danger: #f43f5e;
+            --waiting: #fbbf24;
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            background: #050505;
+            color: white;
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+
+        /* خلفية النجوم المتحركة */
+        #bg-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top right, #1e1b4b, #050505);
+            z-index: -1;
+        }
+
+        .container { max-width: 1300px; margin: 0 auto; padding: 20px; position: relative; }
+
+        /* الهيدر الخرافي */
+        header {
+            padding: 40px 25px;
+            background: linear-gradient(145deg, rgba(255,255,255,0.05), transparent);
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 1000;
+            background: linear-gradient(to left, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .back-btn {
+            background: var(--glass);
+            padding: 12px 25px;
+            border-radius: 18px;
+            color: white;
+            text-decoration: none;
+            border: 1px solid var(--glass-border);
+            transition: 0.4s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .back-btn:hover { background: var(--accent); color: var(--primary); transform: scale(1.05); }
+
+        /* أزرار التبديل - Tabs */
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            padding: 10px;
+            background: var(--glass);
+            width: fit-content;
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .tab-btn {
+            padding: 15px 35px;
+            border-radius: 20px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            font-weight: 800;
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            font-size: 1rem;
+        }
+
+        .tab-btn span {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 10px;
+            border-radius: 10px;
+            margin-right: 8px;
+            font-size: 0.8rem;
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        /* شبكة البطاقات */
+        .section { display: none; opacity: 0; transform: translateY(20px); transition: 0.5s; }
+        .section.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* تصميم البطاقة (The Card) */
+        .card {
+            background: linear-gradient(165deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
+            border-radius: 35px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(25px);
+            transition: 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 5px;
+            background: var(--purple-glow);
+            opacity: 0; transition: 0.4s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .member-avatar {
+            width: 70px; height: 70px;
+            background: linear-gradient(45deg, var(--purple-glow), #ec4899);
+            border-radius: 22px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; margin-bottom: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .member-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; color: #fff; }
+
+        .info-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            width: 100%;
+        }
+
+        .info-tag i { color: var(--accent); }
+
+        /* الأزرار داخل البطاقة */
+        .actions { display: flex; gap: 12px; margin-top: 25px; }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 18px;
+            border: none;
+            cursor: pointer;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn-main { background: #fff; color: #000; }
+        .btn-main:hover { background: var(--accent); transform: scale(1.05); }
+
+        .btn-outline { background: rgba(255, 63, 94, 0.1); color: var(--danger); border: 1px solid rgba(254, 63, 94, 0.2); }
+        .btn-outline:hover { background: var(--danger); color: white; }
+
+        /* انيميشن الظهور */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card { animation: fadeIn 0.6s ease forwards; }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-canvas"></div>
+
+    <div class="container">
+        <header>
+            <div>
+                <h1>إدارة شؤون الأعضاء</h1>
+                <p style="color: #94a3b8; margin-top: 5px;">فوج المستقبل | التميز في الإدارة الرقمية</p>
+            </div>
+            <a href="dashboard.html" class="back-btn">
+                <i class="fa fa-arrow-right"></i>
+                العودة للوحة الرئيسية
+            </a>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('requests', this)">
+                <span><i class="fa fa-envelope-open"></i></span>
+                طلبات جديدة (<span id="count1">0</span>)
+            </button>
+            <button class="tab-btn" onclick="switchTab('waiting', this)">
+                <span><i class="fa fa-clock"></i></span>
+                قيد الانتظار (<span id="count2">0</span>)
+            </button>
+        </div>
+
+        <div id="requests" class="section active"></div>
+        <div id="waiting" class="section"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, addDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.switchTab = (tabId, btn) => {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        onSnapshot(collection(db, "registration_requests"), (snap) => {
+            const container = document.getElementById('requests');
+            document.getElementById('count1').innerText = snap.size;
+            container.innerHTML = '';
+            snap.forEach(doc => container.innerHTML += createCard(doc.data(), doc.id, 'request'));
+        });
+
+        onSnapshot(collection(db, "waiting_list"), (snap) => {
+            const container = document.getElementById('waiting');
+            document.getElementById('count2').innerText = snap.size;
+            container.innerHTML = '';
+            snap.forEach(doc => container.innerHTML += createCard(doc.data(), doc.id, 'waiting'));
+        });
+
+        function createCard(d, id, type) {
+            const isRequest = type === 'request';
+            const icon = isRequest ? 'fa-user-plus' : 'fa-user-clock';
+            const statusText = isRequest ? 'طلب انضمام جديد' : 'بانتظار مقابلة القائد';
+            
+            return `
+                <div class="card">
+                    <div class="member-avatar">
+                        <i class="fa ${icon}"></i>
+                    </div>
+                    <h2 class="member-name">${d.fullName}</h2>
+                    <div class="info-tag"><i class="fa fa-phone"></i> ${d.phone}</div>
+                    <div class="info-tag"><i class="fa fa-map-marker-alt"></i> ${d.address || 'العنوان غير محدد'}</div>
+                    <div class="info-tag"><i class="fa fa-shield-halved"></i> ${statusText}</div>
+                    
+                    <div class="actions">
+                        ${isRequest ? 
+                            `<button class="btn btn-main" onclick="moveToWaiting('${id}')"><i class="fa fa-check-circle"></i> قبول للمقابلة</button>` : 
+                            `<button class="btn btn-main" style="background:#00f2fe; color:#000" onclick="finalizeMembership('${id}')"><i class="fa fa-id-card"></i> تثبيت نهائي</button>`
+                        }
+                        <button class="btn btn-outline" onclick="deleteEntry('${id}', '${isRequest ? 'registration_requests' : 'waiting_list'}')"><i class="fa fa-trash"></i></button>
+                    </div>
+                </div>`;
+        }
+
+        window.moveToWaiting = async (id) => {
+            if(confirm('هل تريد قبول العضو للمقابلة الشخصية؟')) {
+                const snap = await getDoc(doc(db, "registration_requests", id));
+                await addDoc(collection(db, "waiting_list"), { ...snap.data(), status: 'waiting_interview' });
+                await deleteDoc(doc(db, "registration_requests", id));
+            }
+        }
+
+        window.finalizeMembership = async (id) => {
+            if(confirm('سيتم إضافة العضو رسمياً للفوج وتوليد ملف كشفي له، هل أنت متأكد؟')) {
+                const snap = await getDoc(doc(db, "waiting_list", id));
+                const data = snap.data();
+                
+                await addDoc(collection(db, "members"), {
+                    name: data.fullName,
+                    phone: data.phone,
+                    rank: data.type === 'leader' ? 'مساعد قائد' : 'شبل',
+                    workshop: 'عام',
+                    img: '',
+                    joinedAt: serverTimestamp()
+                });
+                
+                await deleteDoc(doc(db, "waiting_list", id));
+                alert('تم التثبيت بنجاح! العضو الآن في لوحة القيادة.');
+            }
+        }
+
+        window.deleteEntry = async (id, coll) => {
+            if(confirm('حذف السجل نهائياً؟ لا يمكن التراجع عن هذه الخطوة.')) {
+                await deleteDoc(doc(db, coll, id));
+            }
+        }
+    </script>
+</body>
+</html>

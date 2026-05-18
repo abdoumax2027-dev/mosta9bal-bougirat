@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأرشيف الملكي | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a052d; --accent: #ffc107; --bg: #0f0a1e;
+            --card-bg: rgba(255, 255, 255, 0.05); --text-main: #ffffff;
+            --gold-gradient: linear-gradient(135deg, #ffc107, #ff9800);
+            --header-bg: rgba(26, 5, 45, 0.9); --danger: #ff4757;
+        }
+
+        [data-theme="light"] {
+            --primary: #4a148c; --bg: #f0f2f5;
+            --card-bg: #ffffff; --text-main: #2d3436;
+            --header-bg: #4a148c;
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
+        body { margin: 0; background: var(--bg); color: var(--text-main); min-height: 100vh; }
+
+        .top-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 25px; background: var(--header-bg); backdrop-filter: blur(15px);
+            position: sticky; top: 0; z-index: 1000; border-bottom: 2px solid var(--accent);
+        }
+
+        .nav-btn {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+            color: var(--text-main); width: 45px; height: 45px; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .nav-btn:hover { background: var(--accent); color: var(--primary); }
+
+        .header-section { padding: 40px 20px; text-align: center; }
+        .header-section h2 { font-weight: 900; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+
+        .container { padding: 20px; max-width: 1000px; margin: 0 auto; }
+
+        .workshop-group {
+            background: var(--card-bg); border-radius: 20px; margin-bottom: 20px;
+            overflow: hidden; border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: 0.3s;
+        }
+
+        .workshop-header {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255, 193, 7, 0.05); cursor: pointer;
+        }
+
+        .workshop-header h3 { margin: 0; color: var(--accent); font-size: 1.2rem; }
+        .actions { display: flex; gap: 10px; align-items: center; }
+
+        .view-btn {
+            background: var(--gold-gradient); border: none; padding: 8px 15px;
+            border-radius: 10px; color: var(--primary); font-weight: bold; cursor: pointer;
+        }
+
+        .table-container {
+            display: none; padding: 15px; background: rgba(0,0,0,0.2);
+            border-top: 1px solid rgba(255,255,255,0.05); overflow-x: auto;
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
+        th { background: rgba(255,193,7,0.1); color: var(--accent); padding: 12px; text-align: right; font-size: 0.9rem; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .badge.present { background: #2ecc71; color: white; }
+        .badge.absent { background: #e74c3c; color: white; }
+
+        .achievement-box {
+            background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 12px;
+            margin: 10px; border-right: 4px solid var(--accent); line-height: 1.6;
+        }
+
+        .no-data { text-align: center; padding: 50px; opacity: 0.5; }
+        .removing { transform: scale(0.9); opacity: 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <button class="nav-btn" onclick="location.href='dashboard.html'"><i class="fa fa-home"></i></button>
+        <div style="font-weight: 900; color: var(--accent);">فوج المستقبل - الأرشيف العام</div>
+        <button class="nav-btn" onclick="toggleTheme()"><i class="fa fa-moon"></i></button>
+    </nav>
+
+    <div class="header-section">
+        <h2><i class="fa fa-shield-halved"></i> أرشيف سجلات الطليعات</h2>
+        <p>متابعة تقارير الحضور والإنجازات من "عرين الطليعة"</p>
+    </div>
+
+    <div class="container" id="mainContainer">
+        <div class="no-data"><i class="fa fa-sync fa-spin"></i> جاري جلب الأرشيف من العرين...</div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, getDocs, orderBy, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadArchive() {
+            const container = document.getElementById('mainContainer');
+            try {
+                // الربط مع كولكشن العرين
+                const snap = await getDocs(query(collection(db, "general_archive"), orderBy("timestamp", "desc")));
+                
+                if (snap.empty) {
+                    container.innerHTML = `<div class="no-data">الأرشيف فارغ حالياً</div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                snap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const logId = docSnap.id;
+                    
+                    let contentHtml = "";
+                    if (data.type === "حضور طليعة") {
+                        contentHtml = `
+                            <div class="table-container" id="details-${logId}">
+                                <table>
+                                    <thead>
+                                        <tr><th>الكشاف</th><th>الحالة</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        ${data.records.map(r => `
+                                            <tr>
+                                                <td>${r.name}</td>
+                                                <td><span class="badge ${r.status === 'present' ? 'present' : 'absent'}">
+                                                    ${r.status === 'present' ? 'حاضر' : 'غائب'}
+                                                </span></td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>`;
+                    } else {
+                        contentHtml = `<div class="achievement-box" id="details-${logId}" style="display:none;">
+                            <i class="fa fa-quote-right" style="opacity:0.3"></i> ${data.content}
+                        </div>`;
+                    }
+
+                    container.innerHTML += `
+                        <div class="workshop-group" id="card-${logId}">
+                            <div class="workshop-header">
+                                <div onclick="toggleTable('details-${logId}')" style="flex-grow: 1">
+                                    <h3>طليعة ${data.patrol}</h3>
+                                    <small style="opacity:0.7">
+                                        <i class="fa fa-user-tie"></i> القائد: ${data.leader} | 
+                                        <i class="fa fa-clock"></i> ${data.date || 'اليوم'}
+                                    </small>
+                                </div>
+                                <div class="actions">
+                                    <span style="font-size:0.7rem; background:var(--primary); padding:4px 8px; border-radius:5px;">${data.type}</span>
+                                    <button class="view-btn" onclick="toggleTable('details-${logId}')">
+                                        <i class="fa fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            ${contentHtml}
+                        </div>
+                    `;
+                });
+
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="no-data">حدث خطأ في الاتصال بالقاعدة</div>`;
+            }
+        }
+
+        window.toggleTable = (id) => {
+            const el = document.getElementById(id);
+            const isVisible = el.style.display === 'block' || (el.classList.contains('table-container') && window.getComputedStyle(el).display === 'block');
+            el.style.display = isVisible ? 'none' : 'block';
+        };
+
+        window.toggleTheme = () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            document.documentElement.setAttribute('data-theme', current === 'light' ? 'dark' : 'light');
+        };
+
+        loadArchive();
+    </script>
+</body>
+</html>

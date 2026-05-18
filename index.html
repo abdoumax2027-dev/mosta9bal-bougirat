@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فوج المستقبل | واجهة النخبة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0a0212; --accent: #ffc107; --purple: #4a148c;
+            --glass: rgba(255, 255, 255, 0.05);
+        }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+
+        body {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: var(--primary); overflow: hidden; perspective: 1000px;
+        }
+
+        #stars {
+            position: absolute; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+        }
+
+        .main-trigger {
+            width: 130px; height: 130px; border-radius: 35px;
+            background: #fff; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 0 30px rgba(124, 77, 255, 0.2);
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100; position: absolute; top: 50%; transform: translateY(-50%);
+        }
+        .main-trigger img { width: 95px; height: 95px; border-radius: 15px; }
+        .main-trigger.active { top: 15%; transform: translateY(-50) scale(0.8); }
+
+        .public-dock {
+            position: absolute; top: calc(50% + 100px); display: flex; gap: 15px;
+            transition: 0.6s ease; z-index: 90; flex-wrap: wrap; justify-content: center;
+        }
+        .public-dock.hidden { opacity: 0; transform: translateY(100px) scale(0.8); pointer-events: none; }
+
+        .dock-btn {
+            padding: 12px 25px; border-radius: 15px; text-decoration: none;
+            color: #fff; font-weight: 800; font-size: 0.9rem;
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); display: flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .dock-btn:hover { background: var(--accent); color: var(--primary); transform: translateY(-5px); }
+
+        .login-box {
+            width: 380px; opacity: 0; pointer-events: none;
+            transform: translateY(100px); transition: 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--glass); padding: 35px; border-radius: 40px;
+            backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.1);
+            text-align: center; z-index: 95; margin-top: 80px;
+        }
+        .login-box.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        .role-tabs { display: flex; background: rgba(0,0,0,0.4); padding: 6px; border-radius: 20px; margin-bottom: 25px; }
+        .tab { flex: 1; padding: 12px; border: none; background: none; color: #888; cursor: pointer; font-weight: 800; border-radius: 15px; font-size: 0.85rem; transition: 0.4s; }
+        .tab.active { background: var(--accent); color: var(--primary); box-shadow: 0 4px 15px rgba(255,193,7,0.3); }
+
+        .input-wrap { position: relative; margin-bottom: 18px; }
+        .input-wrap i { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); color: var(--purple); font-size: 1.1rem; }
+        
+        input { 
+            width: 100%; padding: 18px 50px 18px 20px; border-radius: 18px; border: 2px solid transparent;
+            background: rgba(255,255,255,0.95); outline: none; font-weight: 800; color: var(--primary); transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); background: #fff; transform: scale(1.02); }
+
+        .btn-enter {
+            width: 100%; padding: 18px; border-radius: 18px; border: none;
+            background: linear-gradient(45deg, var(--accent), #ffd54f); color: var(--primary); 
+            font-weight: 900; cursor: pointer; font-size: 1.2rem; margin-top: 10px; transition: 0.3s;
+        }
+        .btn-enter:hover { letter-spacing: 2px; }
+
+        .back-btn { margin-top: 20px; color: rgba(255,255,255,0.4); cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+    </style>
+<link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0212">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="logo.jpg">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('تم تسجيل المحرك بنجاح'))
+                    .catch(err => console.log('فشل تسجيل المحرك', err));
+            });
+        }
+    </script>
+</head>
+<body>
+
+    <div id="stars"></div>
+
+    <div class="main-trigger" id="trigger" onclick="openGate()">
+        <img src="logo.jpg" alt="Logo">
+    </div>
+
+    <div class="public-dock" id="dock">
+        <a href="register.html" class="dock-btn">
+            <i class="fa fa-user-plus"></i> طلبات الانتساب
+        </a>
+        <a href="parent-search.html" class="dock-btn">
+            <i class="fa fa-fingerprint"></i> بوابة الأولياء
+        </a>
+        <a href="public-news.html" class="dock-btn">
+            <i class="fa fa-bolt"></i> جريدة الفوج
+        </a>
+    </div>
+
+    <div class="login-box" id="loginBox">
+        <h2 style="color:white; margin-bottom: 20px; font-weight: 900;">بوابة القيادة</h2>
+        <div class="role-tabs">
+            <button class="tab active" id="btnAdm" onclick="switchRole('admin')">القائد العام</button>
+            <button class="tab" id="btnPat" onclick="switchRole('patrol')">قائد طليعة</button>
+        </div>
+
+        <form id="loginForm">
+            <div class="input-wrap">
+                <i id="uIcon" class="fa fa-user-shield"></i>
+                <input type="text" id="user" placeholder="اسم القائد العام" required>
+            </div>
+            <div class="input-wrap">
+                <i class="fa fa-key"></i>
+                <input type="password" id="pass" placeholder="كلمة السر" required>
+            </div>
+            <button type="submit" id="submitBtn" class="btn-enter">دخول للنظام</button>
+        </form>
+        <span class="back-btn" onclick="closeGate()"><i class="fa fa-arrow-right"></i> العودة</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentRole = 'admin';
+
+        window.openGate = () => {
+            document.getElementById('trigger').classList.add('active');
+            document.getElementById('dock').classList.add('hidden');
+            setTimeout(() => document.getElementById('loginBox').classList.add('show'), 400);
+        }
+
+        window.closeGate = () => {
+            document.getElementById('loginBox').classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('trigger').classList.remove('active');
+                document.getElementById('dock').classList.remove('hidden');
+            }, 400);
+        }
+
+        window.switchRole = (role) => {
+            currentRole = role;
+            document.getElementById('btnAdm').classList.toggle('active', role === 'admin');
+            document.getElementById('btnPat').classList.toggle('active', role === 'patrol');
+            document.getElementById('user').placeholder = (role === 'admin') ? "اسم القائد العام" : "اسم القائد";
+            document.getElementById('uIcon').className = (role === 'admin') ? "fa fa-user-shield" : "fa fa-user-tie";
+        }
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const u = document.getElementById('user').value.trim();
+            const p = document.getElementById('pass').value.trim();
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i> جاري التحقق...';
+
+            try {
+                if (currentRole === 'admin') {
+                    if (u === 'عبد المالك' && p === '1941') {
+                        sessionStorage.setItem('permissions', 'full');
+                        sessionStorage.setItem('userName', 'عبد المالك');
+                        window.location.href = 'dashboard.html';
+                    } else { 
+                        alert('بيانات القائد العام غير صحيحة!'); 
+                        btn.disabled = false;
+                        btn.innerText = "دخول للنظام";
+                    }
+                } else {
+                    const leadRef = doc(db, "leaders_auth", u); 
+                    const leadSnap = await getDoc(leadRef);
+                    
+                    if (leadSnap.exists() && leadSnap.data().password === p) {
+                        sessionStorage.setItem('permissions', 'limited');
+                        sessionStorage.setItem('userName', u);
+                        sessionStorage.setItem('myPatrol', leadSnap.data().patrolName);
+                        window.location.href = 'my-patrol.html'; 
+                    } else { 
+                        alert('اسم القائد أو كلمة السر خاطئة!'); 
+                        btn.disabled = false;
+                        btn.innerText = "دخول للنظام";
+                    }
+                }
+            } catch (err) { 
+                alert('فشل الاتصال بالخادم'); 
+                btn.disabled = false;
+                btn.innerText = "دخول للنظام";
+            }
+        }
+    </script>
+</body>
+</html>

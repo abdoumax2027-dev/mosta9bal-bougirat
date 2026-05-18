@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الملكي | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a052d; --accent: #ffc107; --danger: #ff4757;
+            --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.15);
+            --gold-gradient: linear-gradient(135deg, #ffc107, #ffb300);
+            --success: #00ff88;
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body { margin: 0; min-height: 100vh; background: #0f0a1e; color: #fff; padding-bottom: 50px; overflow-x: hidden; }
+
+        .top-nav {
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+            position: sticky; top: 0; z-index: 1000; background: rgba(26, 5, 45, 0.8);
+        }
+
+        .btn-icon {
+            background: var(--glass); border: 1px solid var(--glass-border);
+            width: 45px; height: 45px; border-radius: 12px; color: var(--accent); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .container { width: 92%; max-width: 800px; margin: 25px auto; }
+
+        .profile-header {
+            background: var(--glass); backdrop-filter: blur(30px); border: 1px solid var(--glass-border);
+            border-radius: 35px; padding: 35px 20px; text-align: center; position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); margin-bottom: 20px;
+        }
+
+        .img-box { position: relative; width: 140px; height: 140px; margin: 0 auto 15px; }
+        .user-photo { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent); }
+        
+        .badge-rank {
+            position: absolute; bottom: 0; right: 0; background: var(--gold-gradient);
+            color: #000; padding: 5px 12px; border-radius: 50px; font-weight: 900; font-size: 0.7rem;
+        }
+
+        .user-name { font-size: 1.7rem; font-weight: 900; margin: 10px 0; }
+
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 25px; }
+        .info-card {
+            background: rgba(255,255,255,0.03); padding: 15px; border-radius: 18px;
+            border: 1px solid var(--glass-border); text-align: right;
+        }
+        .info-card label { display: block; font-size: 0.65rem; color: var(--accent); font-weight: 900; margin-bottom: 4px; }
+        .info-card span { font-size: 0.95rem; font-weight: 700; }
+
+        .section-box {
+            background: var(--glass); border-radius: 25px; padding: 20px; margin-bottom: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        .section-title { color: var(--accent); font-weight: 900; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+
+        .star-rating i { cursor: pointer; margin: 0 5px; font-size: 2.2rem; transition: 0.2s; }
+        .star-active { color: var(--accent); text-shadow: 0 0 15px rgba(255, 193, 7, 0.5); }
+
+        .task-row {
+            display: flex; align-items: center; padding: 15px; background: rgba(255,255,255,0.03);
+            border-radius: 15px; margin-bottom: 10px; cursor: pointer; border: 1px solid transparent;
+        }
+        .task-row.done { border: 1px solid var(--success); background: rgba(0, 255, 136, 0.05); }
+        .task-row.done span { color: var(--success); font-weight: bold; }
+        .task-row i { margin-left: 12px; font-size: 1.3rem; color: var(--glass-border); }
+        .task-row.done i { color: var(--success); }
+
+        .edit-input, select {
+            width: 100%; background: #1a052d; border: 1px solid var(--accent);
+            border-radius: 10px; padding: 10px; color: #fff; display: none; margin-top: 5px;
+        }
+        .editing .edit-input, .editing select { display: block; }
+        .editing .static-val { display: none; }
+
+        .actions { display: none; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .editing .actions { display: grid; }
+        .save-btn { background: var(--gold-gradient); border: none; padding: 15px; border-radius: 15px; font-weight: 900; cursor: pointer; }
+        .del-btn { background: rgba(255,71,87,0.1); color: var(--danger); border: 1px solid var(--danger); padding: 15px; border-radius: 15px; font-weight: 900; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <a href="dashboard.html" class="btn-icon" style="text-decoration:none;"><i class="fa-solid fa-chevron-right"></i></a>
+        <div style="font-weight: 900;">ملف العضوية الرقمي</div>
+        <button class="btn-icon" id="editTrigger"><i class="fa-solid fa-pen-to-square"></i></button>
+    </nav>
+
+    <div class="container" id="profileContainer">
+        <div style="text-align:center; padding:50px;"><i class="fa-solid fa-circle-notch fa-spin fa-3x" style="color:var(--accent)"></i></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const memberId = new URLSearchParams(window.location.search).get('id');
+
+        const allTasks = [
+            "حفظ نصف حزب من القرآن الكريم",
+            "ذكر أهم مراحل الثورة التحريرية",
+            "كتابة نص حول أحد الشهداء",
+            "إتقان 10 عقد و دورتين",
+            "تحصيل شارة هواية واحدة"
+        ];
+
+        window.updateStars = async (val) => {
+            await updateDoc(doc(db, "members", memberId), { stars: val });
+        };
+
+        window.toggleTask = async (idx) => {
+            const ref = doc(db, "members", memberId);
+            const snap = await getDoc(ref);
+            let tasks = snap.data().doneTasks || [];
+            tasks = tasks.includes(idx) ? tasks.filter(i => i !== idx) : [...tasks, idx];
+            await updateDoc(ref, { doneTasks: tasks });
+        };
+
+        function listenToProfile() {
+            if(!memberId) {
+                document.getElementById('profileContainer').innerHTML = "<h2 style='text-align:center;'>خطأ: لم يتم تحديد معرف العضو</h2>";
+                return;
+            }
+            onSnapshot(doc(db, "members", memberId), (docSnap) => {
+                if (docSnap.exists()) {
+                    renderUI(docSnap.data());
+                }
+            });
+        }
+
+        function renderUI(d) {
+            const isLeader = d.rank && d.rank.includes("قائد");
+            const container = document.getElementById('profileContainer');
+            const isEditing = document.body.classList.contains('editing');
+
+            container.innerHTML = `
+                <div class="profile-header">
+                    <div class="img-box">
+                        <img src="${d.img || 'logo.jpg'}" class="user-photo">
+                        <div class="badge-rank">${d.rank}</div>
+                    </div>
+                    <h2 class="user-name static-val">${d.name}</h2>
+                    <input type="text" id="inName" class="edit-input" value="${d.name}" style="text-align:center;">
+
+                    <div class="info-grid">
+                        <div class="info-card"><label>تاريخ الميلاد</label><span class="static-val">${d.dob || '--'}</span><input type="date" id="inDob" class="edit-input" value="${d.dob}"></div>
+                        <div class="info-card"><label>زمرة الدم</label><span class="static-val">${d.blood || '--'}</span><input type="text" id="inBlood" class="edit-input" value="${d.blood}"></div>
+                        <div class="info-card"><label>الحالة الصحية</label><span class="static-val">${d.health || 'سليم'}</span><input type="text" id="inHealth" class="edit-input" value="${d.health}"></div>
+
+                        ${isLeader ? `
+                            <div class="info-card"><label>الهاتف الشخصي</label><span class="static-val">${d.phone || '--'}</span><input type="tel" id="inPhone" class="edit-input" value="${d.phone}"></div>
+                            <div class="info-card"><label>العنوان</label><span class="static-val">${d.address || '--'}</span><input type="text" id="inAddress" class="edit-input" value="${d.address}"></div>
+                            <div class="info-card"><label>كلمة سر القيادة</label><span class="static-val">••••••</span><input type="text" id="inPatrolPass" class="edit-input" value="${d.patrolPass || ''}"></div>
+                        ` : `
+                            <div class="info-card"><label>هاتف الأب</label><span class="static-val">${d.fatherPhone || '--'}</span><input type="tel" id="inFather" class="edit-input" value="${d.fatherPhone}"></div>
+                            <div class="info-card"><label>هاتف الأم</label><span class="static-val">${d.motherPhone || '--'}</span><input type="tel" id="inMother" class="edit-input" value="${d.motherPhone}"></div>
+                            <div class="info-card"><label>كلمة سر الولي</label><span class="static-val">••••••</span><input type="text" id="inParentPass" class="edit-input" value="${d.parentPass || ''}"></div>
+                        `}
+                    </div>
+                </div>
+
+                ${isLeader ? `
+                <div class="section-box">
+                    <div class="section-title"><i class="fa-solid fa-graduation-cap"></i> التأهيل القيادي</div>
+                    <div class="info-card">
+                        <label>مستوى الشارة الخشبية</label>
+                        <span class="static-val">${d.woodLevel || 'غير محدد'}</span>
+                        <select id="inWoodLevel" class="edit-input">
+                            <option value="بدون" ${d.woodLevel === 'بدون' ? 'selected' : ''}>بدون</option>
+                            <option value="التمهيدية الخشبية" ${d.woodLevel === 'التمهيدية الخشبية' ? 'selected' : ''}>التمهيدية الخشبية</option>
+                            <option value="الإعدادية الخشبية" ${d.woodLevel === 'الإعدادية الخشبية' ? 'selected' : ''}>الإعدادية الخشبية</option>
+                            <option value="الخشبية" ${d.woodLevel === 'الخشبية' ? 'selected' : ''}>الخشبية</option>
+                        </select>
+                    </div>
+                </div>
+                ` : `
+                <div class="section-box">
+                    <div class="section-title"><i class="fa-solid fa-star"></i> التقييم والنجوم</div>
+                    <div class="star-rating" style="text-align:center;">
+                        ${[1,2,3,4,5].map(i => `<i class="fa-star ${i <= (d.stars || 0) ? 'fa-solid star-active' : 'fa-regular'}" onclick="updateStars(${i})"></i>`).join('')}
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-title"><i class="fa-solid fa-medal"></i> ياقة التقدم (المهام المنجزة)</div>
+                    ${allTasks.map((task, idx) => `
+                        <div class="task-row ${(d.doneTasks || []).includes(idx) ? 'done' : ''}" onclick="toggleTask(${idx})">
+                            <i class="fa-solid ${(d.doneTasks || []).includes(idx) ? 'fa-check-circle' : 'fa-circle'}"></i>
+                            <span>${task}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                `}
+
+                <div class="section-box">
+                    <div class="section-title"><i class="fa-solid fa-clipboard"></i> ملاحظات القيادة</div>
+                    <div class="static-val" style="white-space: pre-line;">${d.notes || 'لا توجد ملاحظات'}</div>
+                    <textarea id="inNotes" class="edit-input" style="height:100px; width:100%; border-radius:15px; padding:10px;">${d.notes || ''}</textarea>
+                </div>
+
+                <div class="actions" style="${isEditing ? 'display:grid' : ''}">
+                    <button class="save-btn" onclick="saveData()"><i class="fa-solid fa-save"></i> حفظ التعديلات</button>
+                    <button class="del-btn" onclick="deleteProfile()"><i class="fa-solid fa-trash"></i> حذف العضو</button>
+                </div>
+            `;
+        }
+
+        document.getElementById('editTrigger').onclick = () => {
+            const isEditing = document.body.classList.toggle('editing');
+            document.querySelector('.actions').style.display = isEditing ? 'grid' : 'none';
+        };
+
+        window.saveData = async () => {
+            const updates = {
+                name: document.getElementById('inName').value,
+                dob: document.getElementById('inDob').value,
+                blood: document.getElementById('inBlood').value,
+                health: document.getElementById('inHealth').value,
+                notes: document.getElementById('inNotes').value
+            };
+            
+            if(document.getElementById('inPhone')) updates.phone = document.getElementById('inPhone').value;
+            if(document.getElementById('inAddress')) updates.address = document.getElementById('inAddress').value;
+            if(document.getElementById('inPatrolPass')) updates.patrolPass = document.getElementById('inPatrolPass').value;
+            if(document.getElementById('inFather')) updates.fatherPhone = document.getElementById('inFather').value;
+            if(document.getElementById('inMother')) updates.motherPhone = document.getElementById('inMother').value;
+            if(document.getElementById('inParentPass')) updates.parentPass = document.getElementById('inParentPass').value;
+            
+            // حفظ مستوى الشارة المختار من القائمة
+            if(document.getElementById('inWoodLevel')) updates.woodLevel = document.getElementById('inWoodLevel').value;
+
+            try {
+                await updateDoc(doc(db, "members", memberId), updates);
+                alert("تم التحديث بنجاح ✅");
+                document.body.classList.remove('editing');
+            } catch (e) {
+                alert("فشل التحديث!");
+            }
+        };
+
+        window.deleteProfile = async () => {
+            if(confirm("سيتم حذف بيانات العضو نهائياً، هل أنت متأكد؟")) {
+                await deleteDoc(doc(db, "members", memberId));
+                window.location.href = "dashboard.html";
+            }
+        };
+
+        listenToProfile();
+    </script>
+</body>
+</html>

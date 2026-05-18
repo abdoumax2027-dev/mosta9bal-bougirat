@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الحضور الملكي | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a052d; --accent: #ffc107; --bg: #0f0a1e;
+            --glass: rgba(255, 255, 255, 0.05);
+            --gold-gradient: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            --royal-gradient: linear-gradient(145deg, #2e0854, #1a052d);
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body { 
+            margin: 0; background: var(--bg); color: #fff; min-height: 100vh;
+            background-image: fixed;
+            background-image: radial-gradient(circle at 10% 20%, rgba(74, 20, 140, 0.3) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 193, 7, 0.1) 0%, transparent 40%);
+        }
+
+        /* شريط علوي سينمائي */
+        .top-nav {
+            background: rgba(26, 5, 45, 0.8); backdrop-filter: blur(20px);
+            padding: 20px; display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,193,7,0.3);
+        }
+
+        .container { padding: 25px; max-width: 900px; margin: 0 auto; }
+
+        /* كرت التاريخ */
+        .date-card {
+            background: var(--royal-gradient); padding: 30px; border-radius: 30px;
+            text-align: center; margin-bottom: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,193,7,0.2); position: relative; overflow: hidden;
+        }
+        .date-card::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.05), transparent);
+            transform: rotate(45deg); animation: shine 6s infinite;
+        }
+
+        @keyframes shine { 0% { transform: translateX(-100%) rotate(45deg); } 100% { transform: translateX(100%) rotate(45deg); } }
+
+        /* عناوين الورشات */
+        .workshop-title { 
+            font-size: 1.4rem; font-weight: 900; margin: 40px 0 20px;
+            display: flex; align-items: center; gap: 15px; color: var(--accent);
+        }
+        .workshop-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
+
+        /* كرت العضو الخرافي */
+        .member-card {
+            background: var(--glass); backdrop-filter: blur(10px); border-radius: 25px;
+            padding: 15px 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .member-card:hover { transform: scale(1.02); border-color: var(--accent); background: rgba(255,255,255,0.1); }
+
+        .member-info { display: flex; align-items: center; gap: 15px; }
+        .member-info img { 
+            width: 55px; height: 55px; border-radius: 18px; object-fit: cover;
+            border: 2px solid var(--accent); box-shadow: 0 0 15px rgba(255,193,7,0.3);
+        }
+        .member-name { font-weight: 900; font-size: 1rem; color: #fff; }
+        .member-rank { font-size: 0.75rem; color: var(--accent); opacity: 0.8; }
+
+        /* أزرار الحالات (Neon Style) */
+        .status-group { display: flex; gap: 10px; }
+        .btn-status {
+            width: 45px; height: 45px; border-radius: 15px; border: 2px solid transparent;
+            cursor: pointer; background: rgba(0,0,0,0.3); color: #fff; font-size: 1rem;
+        }
+
+        .btn-p.active { background: #00c853; border-color: #00e676; box-shadow: 0 0 15px #00c853; }
+        .btn-l.active { background: #ffd600; border-color: #ffff00; color: #000; box-shadow: 0 0 15px #ffd600; }
+        .btn-a.active { background: #ff1744; border-color: #ff5252; box-shadow: 0 0 15px #ff1744; }
+
+        /* زر الحفظ العائم */
+        .save-container {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 500px; z-index: 1000;
+        }
+        .btn-save {
+            width: 100%; padding: 18px; border-radius: 20px; border: none;
+            background: var(--gold-gradient); color: var(--primary); font-weight: 900;
+            font-size: 1.2rem; cursor: pointer; box-shadow: 0 10px 30px rgba(255, 152, 0, 0.4);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-save:active { transform: scale(0.95); }
+
+        .no-data { text-align: center; padding: 100px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <nav class="top-nav">
+        <button onclick="location.href='dashboard.html'" class="btn-status"><i class="fa fa-chevron-right"></i></button>
+        <div style="text-align: center;">
+            <div style="font-weight: 900; font-size: 1.2rem; color: var(--accent);">فوج المستقبل</div>
+            <div style="font-size: 0.6rem; letter-spacing: 2px; opacity: 0.7;">REGISTRE ROYAL</div>
+        </div>
+        <img src="logo.jpg" style="width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--accent);">
+    </nav>
+
+    <div class="container">
+        <div class="date-card">
+            <i class="fa fa-crown" style="color: var(--accent); font-size: 2rem; margin-bottom: 10px;"></i>
+            <h2 id="todayDate" style="margin: 0; font-weight: 900;">جاري التحميل...</h2>
+            <p style="margin: 10px 0 0; font-size: 0.85rem; opacity: 0.8;">بصفتك القائد: <span id="leaderName" style="color: var(--accent);">--</span></p>
+        </div>
+
+        <div id="membersList">
+            <div class="no-data"><i class="fa fa-circle-notch fa-spin fa-2x"></i></div>
+        </div>
+    </div>
+
+    <div style="height: 120px;"></div>
+
+    <div class="save-container">
+        <button class="btn-save" onclick="saveFinalAttendance()">
+            <i class="fa fa-file-signature"></i> اعتماد السجل الملكي
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const perms = sessionStorage.getItem('permissions');
+        const workshop = sessionStorage.getItem('myWorkshop');
+        const myName = sessionStorage.getItem('userName');
+        let attendanceData = {};
+
+        document.getElementById('leaderName').innerText = myName;
+        document.getElementById('todayDate').innerText = new Date().toLocaleDateString('ar-DZ', { weekday: 'long', day: 'numeric', month: 'long' });
+
+        async function loadMembers() {
+            let q = (perms === 'full') ? collection(db, "members") : query(collection(db, "members"), where("workshop", "==", workshop));
+            const snap = await getDocs(q);
+            const groups = {};
+            
+            snap.forEach(doc => {
+                const data = { id: doc.id, ...doc.data() };
+                const ws = data.workshop || "غير مصنف";
+                if(!groups[ws]) groups[ws] = [];
+                groups[ws].push(data);
+            });
+
+            renderUI(groups);
+        }
+
+        function renderUI(groups) {
+            const list = document.getElementById('membersList');
+            list.innerHTML = "";
+
+            Object.keys(groups).forEach(ws => {
+                let html = `<div class="workshop-title"><i class="fa fa-shield-halved"></i> ورشة ${ws}</div>`;
+                groups[ws].forEach(m => {
+                    html += `
+                        <div class="member-card">
+                            <div class="member-info">
+                                <img src="${m.img || 'logo.jpg'}" onerror="this.src='logo.jpg'">
+                                <div>
+                                    <div class="member-name">${m.name}</div>
+                                    <div class="member-rank">${m.rank}</div>
+                                </div>
+                            </div>
+                            <div class="status-group">
+                                <button id="p-${m.id}" class="btn-status btn-p" onclick="mark('${m.id}','${m.name}','${ws}','حاضر')"><i class="fa fa-check"></i></button>
+                                <button id="l-${m.id}" class="btn-status btn-l" onclick="mark('${m.id}','${m.name}','${ws}','متأخر')"><i class="fa fa-clock"></i></button>
+                                <button id="a-${m.id}" class="btn-status btn-a" onclick="mark('${m.id}','${m.name}','${ws}','غائب')"><i class="fa fa-times"></i></button>
+                            </div>
+                        </div>`;
+                });
+                list.innerHTML += html;
+            });
+        }
+
+        window.mark = (id, name, ws, status) => {
+            attendanceData[id] = { name, ws, status };
+            document.querySelectorAll(`[id$="-${id}"]`).forEach(b => b.classList.remove('active'));
+            const prefix = status === 'حاضر' ? 'p-' : status === 'متأخر' ? 'l-' : 'a-';
+            document.getElementById(prefix + id).classList.add('active');
+        };
+
+        window.saveFinalAttendance = async () => {
+            const ids = Object.keys(attendanceData);
+            if(ids.length === 0) return alert("سجل حضور الأعضاء أولاً يا قائد!");
+            
+            if(!confirm(`اعتماد سجل ${ids.length} عضواً؟`)) return;
+
+            try {
+                const todayStr = new Date().toISOString().split('T')[0];
+                for(let id of ids) {
+                    const item = attendanceData[id];
+                    await addDoc(collection(db, "attendance_logs"), {
+                        memberId: id, memberName: item.name, workshop: item.ws,
+                        status: item.status, recordedBy: myName, date: todayStr,
+                        timestamp: serverTimestamp()
+                    });
+                }
+                alert("تم الإرسال للأرشيف الملكي بنجاح!");
+                location.href = 'dashboard.html';
+            } catch(e) { alert("خطأ في الاتصال!"); }
+        };
+
+        loadMembers();
+    </script>
+</body>
+</html>

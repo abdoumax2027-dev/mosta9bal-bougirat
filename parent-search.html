@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة التميز | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f0a1e; --accent: #ffc107; --card-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1); --text-color: #ffffff;
+            --gold-gradient: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            --success: #00ff88;
+        }
+
+        .light-mode {
+            --primary: #f8f9fa; --accent: #6200ea; --card-bg: #ffffff;
+            --glass-border: rgba(0, 0, 0, 0.08); --text-color: #2d3436;
+        }
+
+        /* --- تأثير دخول الصفحة المضاف --- */
+        @keyframes pageEntrance {
+            from { opacity: 0; transform: scale(0.98) translateY(15px); filter: blur(5px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+
+        * { box-sizing: border-box; transition: 0.3s; }
+        body { 
+            margin: 0; background: var(--primary); color: var(--text-color); 
+            font-family: 'Cairo', sans-serif; min-height: 100vh; overflow-x: hidden;
+            animation: pageEntrance 0.8s ease-out forwards; /* تطبيق الأنيميشن */
+        }
+        /* ------------------------------- */
+
+        .top-nav { position: fixed; top: 15px; left: 15px; right: 15px; display: flex; justify-content: space-between; z-index: 1000; }
+        .nav-btn {
+            width: 45px; height: 45px; border-radius: 12px; background: var(--card-bg);
+            backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+            color: var(--accent); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .container { width: 95%; max-width: 550px; margin: 80px auto 40px; }
+        
+        .glass-box {
+            background: var(--card-bg); backdrop-filter: blur(20px); border-radius: 25px;
+            padding: 30px; border: 1px solid var(--glass-border); box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .input-group { position: relative; margin-bottom: 15px; }
+        .input-group i { position: absolute; right: 15px; top: 15px; color: var(--accent); }
+        input {
+            width: 100%; padding: 15px 45px 15px 15px; border-radius: 15px; border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.2); color: #fff; font-family: 'Cairo'; outline: none;
+        }
+        .light-mode input { background: #f1f3f5; color: #000; }
+
+        .btn-search {
+            width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--gold-gradient);
+            color: #000; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .son-card { display: none; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card-inner { background: var(--card-bg); border-radius: 30px; border: 1px solid var(--glass-border); padding: 30px 20px; position: relative; }
+        .son-img-frame { width: 110px; height: 110px; margin: 0 auto 15px; border-radius: 50%; border: 3px solid var(--accent); padding: 3px; overflow: hidden; }
+        .son-img-frame img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .info-box { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border); }
+        .info-box label { display: block; font-size: 0.65rem; color: var(--accent); font-weight: bold; margin-bottom: 2px; }
+        .info-box span { font-weight: 700; font-size: 0.85rem; }
+
+        .task-list { margin-top: 15px; }
+        .task-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px;
+            background: rgba(255,255,255,0.02); border-radius: 10px; margin-bottom: 5px; font-size: 0.8rem;
+        }
+        .task-item.done { color: var(--success); border-right: 3px solid var(--success); background: rgba(0, 255, 136, 0.05); }
+
+        #loading { display: none; text-align: center; margin: 20px; }
+        .star-gold { color: var(--accent); text-shadow: 0 0 8px rgba(255,193,7,0.5); }
+    </style>
+</head>
+<body>
+
+    <div class="top-nav">
+        <a href="dashboard.html" class="nav-btn"><i class="fa fa-home"></i></a>
+        <div class="nav-btn" id="themeBtn"><i id="tIcon" class="fa fa-moon"></i></div>
+    </div>
+
+    <div class="container">
+        <div class="glass-box" id="searchBox" style="text-align: center;">
+            <div style="width:80px; margin:0 auto 15px;"><img src="logo.jpg" style="width:100%; border-radius:50%; border: 2px solid var(--accent);"></div>
+            <h2 style="margin-bottom:10px; font-weight: 900;">بوابة الأولياء</h2>
+            <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 25px;">فوج المستقبل - تابع تقدم ابنك الكشفي</p>
+            
+            <div class="input-group">
+                <i class="fa fa-user"></i>
+                <input type="text" id="parentSearchName" placeholder="اسم الكشاف الكامل">
+            </div>
+            <div class="input-group">
+                <i class="fa fa-lock"></i>
+                <input type="password" id="parentKey" placeholder="كلمة سر ولي الأمر">
+            </div>
+            <button class="btn-search" id="searchBtn">
+                <i class="fa fa-sign-in-alt"></i> دخول ملف الابن
+            </button>
+        </div>
+
+        <div id="loading"><i class="fa-solid fa-circle-notch fa-spin fa-2x" style="color:var(--accent)"></i></div>
+
+        <div id="profileCard" class="son-card">
+            <div class="card-inner">
+                <div style="text-align:center;">
+                    <div class="son-img-frame"><img id="pImg" src="logo.jpg"></div>
+                    <h2 id="pName" style="margin:5px 0; font-weight: 900;"></h2>
+                    <div id="pRank" style="display:inline-block; padding: 4px 20px; border-radius: 50px; background: var(--gold-gradient); color: #000; font-weight: 900; font-size: 0.85rem; margin-bottom: 10px;"></div>
+                    <div id="pStars" style="font-size: 1.5rem; margin: 5px 0;"></div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box"><label>تاريخ الميلاد</label><span id="pDob"></span></div>
+                    <div class="info-box"><label>زمرة الدم</label><span id="pBlood"></span></div>
+                    <div class="info-box"><label>الحالة الصحية</label><span id="pHealth"></span></div>
+                    <div class="info-box"><label>تاريخ الانخراط</label><span id="pJoin"></span></div>
+                </div>
+
+                <div style="margin-top:20px;">
+                    <span style="font-weight:900; color:var(--accent); font-size:0.9rem;"><i class="fa fa-medal"></i> ياقة التقدم</span>
+                    <div id="taskList" class="task-list"></div>
+                </div>
+
+                <div style="margin-top:20px;">
+                    <span style="font-weight:900; color:var(--accent); font-size:0.9rem;"><i class="fa fa-comment-dots"></i> ملاحظات القيادة</span>
+                    <div id="pNotes" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; font-size:0.85rem; margin-top:10px; border: 1px solid var(--glass-border); line-height: 1.6;"></div>
+                </div>
+
+                <button onclick="location.reload()" style="width:100%; margin-top:25px; background:rgba(255,71,87,0.1); border:1px solid #ff4757; color:#ff4757; padding:12px; border-radius:15px; cursor:pointer; font-weight:bold;">خروج</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // تشغيل زر الثيمات
+        document.getElementById('themeBtn').onclick = () => {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('tIcon');
+            icon.className = document.body.classList.contains('light-mode') ? "fa fa-sun" : "fa fa-moon";
+        };
+
+        const allTasks = ["حفظ نصف حزب", "ذكر أهم مراحل الثورة", "كتابة نص حول أحد الشهداء", "إتقان 10 عقد و دورتين", "تحصيل شارة هواية واحدة"];
+
+        // وظيفة البحث
+        document.getElementById('searchBtn').onclick = async () => {
+            const nameInput = document.getElementById('parentSearchName').value.trim();
+            const passInput = document.getElementById('parentKey').value.trim();
+            
+            if(!nameInput || !passInput) return alert("يرجى إدخال كافة البيانات");
+
+            document.getElementById('loading').style.display = "block";
+            
+            try {
+                const q = query(collection(db, "members"), where("parentPass", "==", passInput));
+                const snap = await getDocs(q);
+                
+                let found = false;
+                snap.forEach((doc) => {
+                    const d = doc.data();
+                    if (d.name && d.name.trim() === nameInput) {
+                        found = true;
+                        renderFinalProfile(d);
+                    }
+                });
+
+                if(!found) alert("اسم الكشاف أو كلمة السر غير مطابقة");
+
+            } catch (e) {
+                console.error(e);
+                alert("حدث خطأ أثناء الاتصال بقاعدة البيانات");
+            }
+            document.getElementById('loading').style.display = "none";
+        };
+
+        function renderFinalProfile(d) {
+            document.getElementById('pName').innerText = d.name;
+            document.getElementById('pRank').innerText = d.rank || "كشاف";
+            document.getElementById('pDob').innerText = d.dob || "--";
+            document.getElementById('pBlood').innerText = d.blood || "--";
+            document.getElementById('pHealth').innerText = d.health || "سليم";
+            document.getElementById('pJoin').innerText = d.joinDate || "--";
+            document.getElementById('pNotes').innerText = d.notes || "لا توجد ملاحظات حالياً.";
+            document.getElementById('pImg').src = d.img || 'logo.jpg';
+            
+            let starHTML = '';
+            const starsCount = parseInt(d.stars) || 0;
+            for(let i=1; i<=5; i++) {
+                starHTML += `<i class="fa-star ${i <= starsCount ? 'fa-solid star-gold' : 'fa-regular'}"></i>`;
+            }
+            document.getElementById('pStars').innerHTML = starHTML;
+
+            const doneTasks = d.doneTasks || [];
+            document.getElementById('taskList').innerHTML = allTasks.map((task, idx) => `
+                <div class="task-item ${doneTasks.includes(idx) ? 'done' : ''}">
+                    <i class="fa-solid ${doneTasks.includes(idx) ? 'fa-check-circle' : 'fa-circle-xmark'}"></i>
+                    <span>${task}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('searchBox').style.display = "none";
+            document.getElementById('profileCard').style.display = "block";
+        }
+    </script>
+</body>
+</html>

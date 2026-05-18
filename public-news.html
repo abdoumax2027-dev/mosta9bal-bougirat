@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جريدة فوج المستقبل | الواجهة الكبرى</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --main-bg: #0f021e;
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --accent: #ffc107;
+            --text-main: #ffffff;
+            --glass-border: rgba(255, 255, 255, 0.12);
+        }
+
+        body.light-mode {
+            --main-bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --accent: #6200ea;
+            --text-main: #1a052d;
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            margin: 0; background: var(--main-bg); color: var(--text-main);
+            font-family: 'Cairo', sans-serif; overflow-x: hidden; min-height: 100vh;
+        }
+
+        .animated-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 30%, #2e0854 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, #4a148c 0%, transparent 40%);
+            z-index: -1; filter: blur(80px); opacity: 0.6;
+        }
+
+        .hero-section {
+            text-align: center; padding: 50px 20px; background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px); border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 40px;
+        }
+
+        .hero-section img {
+            width: 100px; height: 100px; border-radius: 25px;
+            border: 3px solid var(--accent); margin-bottom: 15px;
+        }
+
+        .hero-section h1 {
+            font-size: 2.2rem; font-weight: 900; margin: 0;
+            background: linear-gradient(to left, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 0 15px 50px; }
+
+        /* تصميم بطاقة الجريدة */
+        .news-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            margin-bottom: 40px;
+            overflow: hidden; /* لقص زوايا الصورة */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* تنسيق الصورة في الجريدة */
+        .post-image {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+            border-bottom: 4px solid var(--accent);
+            display: block;
+        }
+
+        .card-body { padding: 25px; }
+
+        .date-chip {
+            background: var(--accent); color: #000; padding: 4px 12px;
+            border-radius: 8px; font-weight: bold; font-size: 0.8rem;
+            display: inline-flex; align-items: center; gap: 6px; margin-bottom: 15px;
+        }
+
+        .news-title { font-size: 1.6rem; font-weight: 900; margin: 0 0 15px 0; color: var(--accent); line-height: 1.4; }
+        .news-content { font-size: 1.05rem; line-height: 1.8; opacity: 0.9; white-space: pre-wrap; }
+
+        .footer-card {
+            margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--glass-border);
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.9rem; opacity: 0.7;
+        }
+
+        /* أزرار التنقل */
+        .fab-container { position: fixed; bottom: 25px; left: 25px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
+        .fab {
+            width: 55px; height: 55px; border-radius: 15px; background: var(--accent);
+            color: #1a052d; border: none; cursor: pointer; font-size: 1.3rem;
+            display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+            text-decoration: none;
+        }
+
+        .loader-container { text-align: center; padding: 100px; color: var(--accent); }
+        
+        /* إخفاء الصورة إذا لم تكن موجودة */
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="animated-bg"></div>
+
+    <div class="fab-container">
+        <button class="fab" onclick="toggleTheme()"><i id="themeIcon" class="fa fa-moon"></i></button>
+        <a href="index.html" class="fab"><i class="fa fa-arrow-right"></i></a>
+    </div>
+
+    <header class="hero-section">
+        <img src="logo.jpg" alt="Logo">
+        <h1>جريدة فوج المستقبل</h1>
+        <p>الأخبار والنشاطات الكشفية بالصور</p>
+    </header>
+
+    <main class="container" id="newsList">
+        <div class="loader-container">
+            <i class="fas fa-spinner fa-spin fa-3x"></i>
+            <p style="margin-top:20px;">جاري تحميل العدد الجديد...</p>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جلب البيانات من announcements
+        const q = query(collection(db, "announcements"), orderBy("timestamp", "desc"));
+        
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('newsList');
+            if (snapshot.empty) {
+                list.innerHTML = `<div style="text-align:center; padding:100px; opacity:0.5;"><i class="fa fa-newspaper fa-4x"></i><h3>لا يوجد منشورات مصورة بعد</h3></div>`;
+                return;
+            }
+
+            list.innerHTML = "";
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                
+                // تنسيق الوقت
+                let dateStr = "منشور حديثاً";
+                if (data.timestamp) {
+                    const d = data.timestamp.toDate ? data.timestamp.toDate() : new Date(data.timestamp);
+                    dateStr = d.toLocaleDateString('ar-DZ', { day: 'numeric', month: 'long', year: 'numeric' });
+                }
+
+                // التحقق من وجود صورة (إذا كان الحقل اسمه image أو img)
+                const imageUrl = data.image || data.img || ""; 
+                const imageHTML = imageUrl ? `<img src="${imageUrl}" class="post-image" alt="Post Image">` : "";
+
+                list.innerHTML += `
+                    <article class="news-card">
+                        ${imageHTML}
+                        <div class="card-body">
+                            <div class="date-chip">
+                                <i class="fa fa-calendar-day"></i> ${dateStr}
+                            </div>
+                            <h2 class="news-title">${data.title || "إعلان من الفوج"}</h2>
+                            <div class="news-content">${data.text || ""}</div>
+                            
+                            <div class="footer-card">
+                                <span><i class="fa fa-flag-checkered"></i> وحدة فوج المستقبل</span>
+                                <img src="logo.jpg" style="width:30px; height:30px; border-radius:50%;">
+                            </div>
+                        </div>
+                    </article>
+                `;
+            });
+        }, (error) => {
+            console.error("Error:", error);
+            document.getElementById('newsList').innerHTML = "<p style='text-align:center; color:red;'>فشل في جلب الصور. تحقق من الإنترنت.</p>";
+        });
+
+        window.toggleTheme = () => {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('themeIcon');
+            icon.className = document.body.classList.contains('light-mode') ? "fa fa-sun" : "fa fa-moon";
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الانتساب | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #0a0212; --accent: #ffc107; --purple: #4a148c;
+            --glass: rgba(255, 255, 255, 0.07);
+        }
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            background: var(--primary); overflow-x: hidden; padding: 20px;
+        }
+
+        #stars {
+            position: fixed; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+        }
+
+        .floating-back { position: fixed; top: 25px; left: 25px; z-index: 1000; }
+        .back-home-btn {
+            padding: 10px 20px; border-radius: 15px; text-decoration: none;
+            color: #fff; font-weight: 800; font-size: 0.9rem;
+            background: var(--glass); border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px); display: flex; align-items: center; gap: 10px; transition: 0.3s;
+        }
+        .back-home-btn:hover { background: var(--accent); color: var(--primary); transform: translateX(-5px); }
+
+        .container { width: 100%; max-width: 900px; z-index: 10; }
+
+        .selection-cards { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .selection-cards.hidden { opacity: 0; transform: scale(0.8); pointer-events: none; position: absolute; }
+
+        .card {
+            background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 40px; padding: 40px; width: 320px; text-align: center; cursor: pointer; transition: 0.5s;
+        }
+        .card:hover { transform: translateY(-15px); border-color: var(--accent); box-shadow: 0 20px 40px rgba(255, 193, 7, 0.2); }
+        .card i { font-size: 4rem; color: var(--accent); margin-bottom: 20px; }
+        .card h3 { color: #fff; font-size: 1.8rem; margin-bottom: 10px; }
+        .card p { color: rgba(255,255,255,0.6); font-size: 0.9rem; }
+
+        .form-box {
+            display: none; background: var(--glass); backdrop-filter: blur(30px);
+            border-radius: 40px; padding: 40px; border: 1px solid rgba(255,255,255,0.1);
+            animation: slideIn 0.8s ease forwards;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .input-group { position: relative; }
+        .input-group i { position: absolute; right: 18px; top: 50px; color: var(--accent); }
+
+        label { display: block; color: var(--accent); margin-bottom: 8px; font-weight: 700; margin-right: 10px; }
+        input, select, textarea {
+            width: 100%; padding: 15px 45px 15px 20px; border-radius: 18px; border: 2px solid transparent;
+            background: rgba(255,255,255,0.9); outline: none; font-weight: 800; color: var(--primary); transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(255,193,7,0.3); }
+
+        .full-width { grid-column: span 2; }
+        @media (max-width: 768px) { .full-width { grid-column: span 1; } }
+
+        .btn-submit {
+            grid-column: span 2; padding: 20px; border-radius: 20px; border: none;
+            background: linear-gradient(45deg, var(--accent), #ffd54f); color: var(--primary);
+            font-weight: 900; font-size: 1.3rem; cursor: pointer; margin-top: 20px; transition: 0.3s;
+        }
+        .btn-submit:hover { transform: scale(1.02); }
+
+        .back-link { display: block; text-align: center; margin-top: 20px; color: #fff; cursor: pointer; opacity: 0.6; }
+    </style>
+</head>
+<body>
+
+    <div id="stars"></div>
+
+    <div class="floating-back">
+        <a href="index.html" class="back-home-btn"><i class="fa fa-arrow-right"></i> الرئيسية</a>
+    </div>
+
+    <div class="container">
+        <div class="selection-cards" id="selectionArea">
+            <div class="card" onclick="showForm('leader')">
+                <i class="fa fa-user-tie"></i>
+                <h3>20 سنة وأعلى</h3>
+                <p>(قائد يتم تنصيبه من طرف قائد الفوج)</p>
+            </div>
+            <div class="card" onclick="showForm('scout')">
+                <i class="fa fa-child"></i>
+                <h3>تحت 20 سنة</h3>
+                <p>(يتم إعطاؤه رتبته من طرف قائد الفوج)</p>
+            </div>
+        </div>
+
+        <div class="form-box" id="formBox">
+            <h2 id="formTitle" style="color: white; text-align: center; margin-bottom: 30px; font-weight: 900;">استمارة الانتساب</h2>
+            
+            <form id="registrationForm" class="form-grid">
+                <div class="input-group">
+                    <label>الاسم واللقب</label>
+                    <i class="fa fa-user"></i>
+                    <input type="text" id="fullName" placeholder="أدخل اسمك الكامل" required>
+                </div>
+
+                <div class="input-group">
+                    <label>تاريخ الميلاد (يوم-شهر-سنة)</label>
+                    <i class="fa fa-calendar"></i>
+                    <input type="text" id="birthDate" placeholder="مثال: 12-08-2010" required>
+                </div>
+
+                <div class="input-group">
+                    <label>مكان الازدياد</label>
+                    <i class="fa fa-map-marker-alt"></i>
+                    <input type="text" id="birthPlace" required>
+                </div>
+
+                <div class="input-group">
+                    <label>مكان الإقامة</label>
+                    <i class="fa fa-home"></i>
+                    <input type="text" id="address" required>
+                </div>
+
+                <div class="input-group">
+                    <label>الجنس</label>
+                    <i class="fa fa-venus-mars"></i>
+                    <select id="gender" required>
+                        <option value="ذكر">ذكر</option>
+                        <option value="أنثى">أنثى</option>
+                    </select>
+                </div>
+
+                <div class="input-group" id="dynamicFieldContainer">
+                    <label id="dynamicLabel">الوظيفة الحالية</label>
+                    <i id="dynamicIcon" class="fa fa-briefcase"></i>
+                    <input type="text" id="dynamicValue" placeholder="">
+                </div>
+
+                <div class="input-group">
+                    <label id="phoneLabel">رقم الهاتف</label>
+                    <i class="fa fa-phone"></i>
+                    <input type="tel" id="phone" placeholder="0XXXXXXXXX" required>
+                </div>
+
+                <div class="input-group" id="meetLeaderContainer">
+                    <label>طلب لقاء قائد الفوج</label>
+                    <i class="fa fa-handshake"></i>
+                    <select id="meetLeader">
+                        <option value="نعم">أرغب في تحديد موعد للقاء</option>
+                        <option value="لاحقاً">سأتواصل لاحقاً</option>
+                    </select>
+                </div>
+
+                <div class="input-group full-width">
+                    <label>سبب الانخراط</label>
+                    <i class="fa fa-heart" style="top: 50px;"></i>
+                    <textarea id="reason" rows="3" placeholder="لماذا تريد الانضمام إلينا؟"></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">إرسال طلب الانتساب السحابي</button>
+            </form>
+            <span class="back-link" onclick="goBack()"><i class="fa fa-arrow-right"></i> العودة للاختيار</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let activeType = '';
+
+        window.showForm = function(type) {
+            activeType = type;
+            document.getElementById('selectionArea').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('formBox').style.display = 'block';
+                const dLabel = document.getElementById('dynamicLabel');
+                const dIcon = document.getElementById('dynamicIcon');
+                const dInput = document.getElementById('dynamicValue');
+
+                if(type === 'leader') {
+                    document.getElementById('formTitle').innerText = 'استمارة انضمام قائد';
+                    document.getElementById('phoneLabel').innerText = 'رقم الهاتف الشخصي (إجباري)';
+                    dLabel.innerText = 'الوظيفة الحالية';
+                    dIcon.className = 'fa fa-briefcase';
+                    dInput.placeholder = 'مهنتك الحالية';
+                    document.getElementById('meetLeaderContainer').style.display = 'block';
+                } else {
+                    document.getElementById('formTitle').innerText = 'استمارة انضمام شبل/كشاف';
+                    document.getElementById('phoneLabel').innerText = 'رقم هاتف ولي الأمر (إجباري)';
+                    dLabel.innerText = 'هوايتك المفضلة';
+                    dIcon.className = 'fa fa-palette';
+                    dInput.placeholder = 'ماذا تحب أن تفعل؟';
+                    document.getElementById('meetLeaderContainer').style.display = 'none';
+                }
+            }, 400);
+        }
+
+        window.goBack = function() {
+            document.getElementById('formBox').style.display = 'none';
+            document.getElementById('selectionArea').classList.remove('hidden');
+        }
+
+        document.getElementById('registrationForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري الحفظ...';
+
+            const formData = {
+                type: activeType,
+                fullName: document.getElementById('fullName').value,
+                birthDate: document.getElementById('birthDate').value,
+                birthPlace: document.getElementById('birthPlace').value,
+                address: document.getElementById('address').value,
+                gender: document.getElementById('gender').value,
+                [activeType === 'leader' ? 'job' : 'hobby']: document.getElementById('dynamicValue').value,
+                phone: document.getElementById('phone').value,
+                reason: document.getElementById('reason').value,
+                status: 'pending',
+                createdAt: serverTimestamp()
+            };
+
+            if(activeType === 'leader') formData.meetRequest = document.getElementById('meetLeader').value;
+
+            try {
+                await addDoc(collection(db, "registration_requests"), formData);
+                alert('تم إرسال طلبك بنجاح!');
+                window.location.href = 'index.html'; 
+            } catch (error) {
+                alert('خطأ في الاتصال: ' + error.message);
+                btn.disabled = false;
+                btn.innerText = 'إرسال طلب الانتساب السحابي';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "فوج المستقبل | واجهة النخبة",
+  "short_name": "المستقبل",
+  "description": "نظام إدارة الكشافة - فوج المستقبل",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0a0212",
+  "theme_color": "#ffc107",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

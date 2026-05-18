@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة عضو | فوج المستقبل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <style>
+        :root {
+            --primary: #2e0854; --accent: #ffc107; --bg-body: #f1f3f6;
+            --card-bg: #f1f3f6; --text-main: #333; --white: #ffffff;
+            --drop-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+            --inner-shadow: inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff;
+        }
+        [data-theme="dark"] {
+            --primary: #a270ff; --accent: #ffc107; --bg-body: #120b1e;
+            --card-bg: #1e142d; --text-main: #e0e0e0; --white: #2a1b3d;
+            --drop-shadow: 5px 5px 15px #08050d, -2px -2px 10px #2a1b3d;
+            --inner-shadow: inset 4px 4px 10px #08050d, inset -2px -2px 5px #2a1b3d;
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: all 0.3s ease; }
+        body { margin: 0; background: var(--bg-body); color: var(--text-main); }
+        
+        .top-navbar { 
+            background: var(--bg-body); height: 70px; display: flex; 
+            align-items: center; justify-content: space-between; padding: 0 20px; 
+            position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(124, 77, 255, 0.1); 
+        }
+
+        .back-btn { 
+            background: var(--card-bg); border: none; width: 40px; height: 40px; 
+            border-radius: 12px; color: var(--primary); cursor: pointer; 
+            box-shadow: var(--drop-shadow); display: flex; align-items: center; justify-content: center; text-decoration: none; 
+        }
+
+        .container { padding: 20px; display: flex; justify-content: center; }
+        
+        .form-card { 
+            background: var(--card-bg); width: 100%; max-width: 650px; 
+            padding: 30px; border-radius: 30px; box-shadow: var(--drop-shadow); 
+        }
+
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .full-width { grid-column: span 2; }
+
+        label { display: block; margin-bottom: 8px; font-size: 0.85rem; color: var(--primary); font-weight: 700; }
+
+        input, select, textarea { 
+            width: 100%; padding: 14px; border: none; border-radius: 15px; 
+            background: var(--card-bg); box-shadow: var(--inner-shadow); 
+            outline: none; font-size: 0.95rem; color: var(--text-main); 
+        }
+
+        .special-section { 
+            grid-column: span 2; background: rgba(255, 193, 7, 0.05); 
+            padding: 20px; border-radius: 20px; border: 1px dashed var(--accent); margin-top: 10px; 
+        }
+
+        .btn-submit { 
+            width: 100%; padding: 18px; background: var(--primary); color: white; 
+            border: none; border-radius: 20px; font-weight: 800; cursor: pointer; 
+            margin-top: 25px; font-size: 1.1rem; box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+        }
+
+        .section-title { 
+            grid-column: span 2; font-size: 0.9rem; color: var(--primary); 
+            border-right: 5px solid var(--accent); padding-right: 12px; margin-top: 15px; font-weight: 900;
+        }
+
+        .photo-upload {
+            width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 25px;
+            background: var(--card-bg); box-shadow: var(--drop-shadow);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden; border: 4px solid var(--accent); cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-navbar">
+        <a href="dashboard.html" class="back-btn"><i class="fa fa-arrow-right"></i></a>
+        <div style="font-weight: 900; color: var(--primary); font-size: 1.1rem;">إضافة عضو للفوج</div>
+        <div style="width: 40px;"></div>
+    </div>
+
+    <div class="container">
+        <div class="form-card">
+            <form id="memberForm">
+                <div class="photo-upload" onclick="document.getElementById('fIn').click()">
+                    <i class="fa fa-user-plus" id="uploadIcon" style="font-size: 2rem; color: var(--primary); opacity: 0.5;"></i>
+                    <img id="previewImg" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <input type="file" id="fIn" hidden accept="image/*">
+                </div>
+
+                <div class="grid-inputs">
+                    <div class="input-group full-width">
+                        <label><i class="fa fa-id-card"></i> الاسم واللقب الكامل</label>
+                        <input type="text" id="name" required placeholder="أدخل الاسم الثلاثي للشبل/العضو">
+                    </div>
+
+                    <div class="input-group">
+                        <label><i class="fa fa-venus-mars"></i> الجنس</label>
+                        <select id="gender" required onchange="updateRanks()">
+                            <option value="ذكر">ذكر (فتيان)</option>
+                            <option value="أنثى">أنثى (فتيات)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i class="fa fa-medal"></i> الرتبة / الوحدة</label>
+                        <select id="rank" required onchange="checkRank()"></select>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label><i class="fa fa-users-viewfinder"></i> اسم الطليعة</label>
+                        <input type="text" id="patrol" placeholder="مثال: طليعة الأسود / طليعة الصقور">
+                    </div>
+
+                    <div id="passwordSection" class="special-section full-width">
+                        <label id="passLabel"><i class="fa fa-key"></i> كلمة المرور</label>
+                        <input type="text" id="memberPass" required placeholder="كلمة مرور للدخول">
+                        <small id="passHint" style="display:block; margin-top:5px; opacity:0.8; font-size:0.75rem;"></small>
+                    </div>
+
+                    <div class="section-title full-width">البيانات الشخصية والمكانية</div>
+                    
+                    <div class="input-group">
+                        <label><i class="fa fa-calendar-day"></i> تاريخ الميلاد</label>
+                        <input type="text" id="dob" required placeholder="مثال: 2012/05/15">
+                    </div>
+
+                    <div class="input-group">
+                        <label><i class="fa fa-map-location-dot"></i> مكان الميلاد</label>
+                        <input type="text" id="pob" required placeholder="مكان الازدياد">
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label><i class="fa fa-house-user"></i> مكان الإقامة (العنوان)</label>
+                        <input type="text" id="address" required placeholder="العنوان الكامل الحالي">
+                    </div>
+
+                    <div class="section-title full-width">البيانات الصحية والاتصال</div>
+
+                    <div class="input-group">
+                        <label><i class="fa fa-droplet"></i> زمرة الدم</label>
+                        <select id="blood">
+                            <option value="غير معروف">غير معروف</option>
+                            <option value="A+">A+</option><option value="A-">A-</option>
+                            <option value="B+">B+</option><option value="B-">B-</option>
+                            <option value="O+">O+</option><option value="O-">O-</option>
+                            <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i class="fa fa-notes-medical"></i> الحالة الصحية</label>
+                        <input type="text" id="healthStatus" placeholder="سليم أو مرض مزمن">
+                    </div>
+
+                    <div id="leaderPhoneSection" class="input-group full-width" style="display: none;">
+                        <label><i class="fa fa-phone-flip"></i> رقم هاتف القائد</label>
+                        <input type="tel" id="leaderPhone" placeholder="0XXXXXXXXX">
+                    </div>
+
+                    <div id="guardianSection" class="full-width" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="input-group">
+                            <label><i class="fa fa-phone"></i> هاتف الأب</label>
+                            <input type="tel" id="fatherPhone" placeholder="0XXXXXXXXX">
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fa fa-phone"></i> هاتف الأم</label>
+                            <input type="tel" id="motherPhone" placeholder="0XXXXXXXXX">
+                        </div>
+                    </div>
+
+                    <div class="input-group full-width">
+                        <label><i class="fa fa-comment-dots"></i> ملاحظات إضافية</label>
+                        <textarea id="note" rows="3" placeholder="أي ملاحظات تخص العضو..."></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-submit">
+                    <i class="fa fa-cloud-arrow-up"></i> حفظ في الأرشيف المركزي
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const rankOptions = {
+            "ذكر": ["قائد الفوج", "نائب قائد الفوج", "مساعد قائد الفوج", "قائد وحدة", "مساعد قائد وحدة", "رهط الجوالة", "كشاف متقدم", "كشاف", "شبل", "برعم"],
+            "أنثى": ["قائدة الفوج", "مساعدة قائدة الفوج", "قائدة وحدة", "مساعدة قائدة وحدة", "دليل", "مرشدة متقدمة", "مرشدة", "زهرة", "برعمة"]
+        };
+
+        window.updateRanks = function() {
+            const gender = document.getElementById('gender').value;
+            const rankSelect = document.getElementById('rank');
+            rankSelect.innerHTML = rankOptions[gender].map(r => `<option value="${r}">${r}</option>`).join('');
+            checkRank();
+        }
+
+        window.checkRank = function() {
+            const rank = document.getElementById('rank').value;
+            const isLeadership = rank.includes("قائد") || rank.includes("نائب") || rank.includes("مساعد");
+            const passLabel = document.getElementById('passLabel');
+            const passHint = document.getElementById('passHint');
+            const guardianSection = document.getElementById('guardianSection');
+            const leaderPhoneSection = document.getElementById('leaderPhoneSection');
+
+            if(isLeadership) {
+                passLabel.innerHTML = `<i class="fa fa-shield-check"></i> كلمة مرور القائد`;
+                passHint.innerText = "هذه الكلمة ستمكن القائد من إدارة طليعته عبر صفحة الدخول.";
+                guardianSection.style.display = "none";
+                leaderPhoneSection.style.display = "block";
+            } else {
+                passLabel.innerHTML = `<i class="fa fa-parent"></i> كلمة مرور الولي`;
+                passHint.innerText = "هذه الكلمة يستخدمها الولي لمتابعة نتائج ابنه.";
+                guardianSection.style.display = "grid";
+                leaderPhoneSection.style.display = "none";
+            }
+        }
+
+        let base64Image = "";
+        document.getElementById('fIn').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 400;
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    base64Image = canvas.toDataURL('image/jpeg', 0.6);
+                    document.getElementById('previewImg').src = base64Image;
+                    document.getElementById('previewImg').style.display = 'block';
+                    document.getElementById('uploadIcon').style.display = 'none';
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        document.getElementById('memberForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> جاري المزامنة...';
+            btn.disabled = true;
+
+            const name = document.getElementById('name').value;
+            const patrolName = document.getElementById('patrol').value || "عام";
+            const password = document.getElementById('memberPass').value;
+            const rank = document.getElementById('rank').value;
+            const isLeadership = rank.includes("قائد") || rank.includes("نائب") || rank.includes("مساعد");
+
+            const data = {
+                name: name,
+                gender: document.getElementById('gender').value,
+                rank: rank,
+                patrolName: patrolName, // تم تعديل الحقل
+                password: password,
+                blood: document.getElementById('blood').value,
+                dob: document.getElementById('dob').value,
+                pob: document.getElementById('pob').value,
+                address: document.getElementById('address').value,
+                health: document.getElementById('healthStatus').value || "سليم",
+                notes: document.getElementById('note').value || "لا توجد ملاحظات.",
+                img: base64Image || "logo.jpg",
+                leaderPhone: document.getElementById('leaderPhone').value || "",
+                fatherPhone: document.getElementById('fatherPhone').value || "",
+                motherPhone: document.getElementById('motherPhone').value || "",
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                // 1. إضافة العضو للأرشيف العام
+                await addDoc(collection(db, "members"), data);
+
+                // 2. إذا كان "قائد"، نقوم بربطه تلقائياً بنظام الدخول (الواجهة الرئيسية)
+                if(isLeadership) {
+                    await setDoc(doc(db, "leaders_auth", name), {
+                        password: password,
+                        patrolName: patrolName
+                    });
+                }
+
+                alert("تم بنجاح! تم تسجيل العضو وربط صلاحياته.");
+                window.location.href = "dashboard.html";
+            } catch (err) {
+                alert("حدث خطأ في الاتصال!");
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa fa-cloud-arrow-up"></i> حفظ في الأرشيف المركزي';
+            }
+        };
+
+        updateRanks();
+    </script>
+</body>
+</html>

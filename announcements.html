@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة إعلانات فوج المستقبل | الإدارة السحابية</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+
+    <style>
+        :root {
+            --primary: #1a052d; --primary-light: #4a148c; --accent: #ffc107;
+            --bg-body: #f4f0f7; --card-bg: #f1f3f6; --text-main: #333;
+            --drop-shadow: 8px 8px 16px #d1c4e9, -8px -8px 16px #ffffff;
+            --inner-shadow: inset 6px 6px 12px #d1c4e9, inset -6px -6px 12px #ffffff;
+        }
+        [data-theme="dark"] {
+            --primary: #0a0212; --primary-light: #a270ff; --accent: #ffc107;
+            --bg-body: #120b1e; --card-bg: #1e142d; --text-main: #e0e0e0;
+            --drop-shadow: 5px 5px 15px #000000, -2px -2px 10px #2a1b3d;
+            --inner-shadow: inset 3px 3px 10px #000000;
+        }
+
+        * { box-sizing: border-box; font-family: 'Cairo', sans-serif; transition: 0.3s; }
+        body { margin: 0; background: var(--bg-body); color: var(--text-main); padding-bottom: 50px; }
+        
+        .header-banner { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-light)); 
+            color: white; padding: 40px 20px; text-align: center; 
+            border-radius: 0 0 40px 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 30px; position: relative;
+        }
+
+        .container { max-width: 700px; margin: 0 auto; padding: 0 20px; }
+
+        .post-box {
+            background: var(--card-bg); padding: 25px; border-radius: 30px;
+            box-shadow: var(--drop-shadow); margin-bottom: 40px;
+        }
+        .input-style {
+            width: 100%; padding: 15px; border-radius: 15px; border: none;
+            background: var(--bg-body); box-shadow: var(--inner-shadow);
+            color: var(--text-main); outline: none; margin-bottom: 15px; font-size: 1rem;
+        }
+        
+        .upload-area {
+            width: 100%; min-height: 150px; border-radius: 20px;
+            border: 2px dashed var(--primary-light); display: flex;
+            align-items: center; justify-content: center; flex-direction: column;
+            cursor: pointer; position: relative; overflow: hidden; margin-bottom: 20px;
+        }
+        .upload-area img { width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0; display: none; }
+        .upload-area i { font-size: 2.5rem; color: var(--primary-light); margin-bottom: 10px; }
+
+        .btn-publish {
+            width: 100%; padding: 15px; border-radius: 15px; border: none;
+            background: var(--accent); color: var(--primary); font-weight: 900;
+            font-size: 1.1rem; cursor: pointer; box-shadow: 0 5px 15px rgba(255,193,7,0.4);
+        }
+
+        .announcement-card {
+            background: var(--card-bg); border-radius: 30px; overflow: hidden;
+            box-shadow: var(--drop-shadow); margin-bottom: 30px; position: relative;
+        }
+
+        .announcement-card img { width: 100%; max-height: 400px; object-fit: cover; display: block; }
+        .card-body { padding: 25px; }
+        .card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 15px; font-size: 0.85rem; opacity: 0.8; }
+        .meta-item { display: flex; align-items: center; gap: 5px; background: rgba(0,0,0,0.05); padding: 4px 12px; border-radius: 8px; }
+        [data-theme="dark"] .meta-item { background: rgba(255,255,255,0.05); }
+
+        .card-title { font-size: 1.4rem; font-weight: 900; color: var(--primary-light); margin: 0 0 10px 0; }
+        .card-text { line-height: 1.8; font-size: 1.05rem; white-space: pre-wrap; }
+
+        .controls-overlay {
+            position: absolute; top: 15px; left: 15px; display: flex; gap: 10px; z-index: 10;
+        }
+        .control-btn {
+            width: 40px; height: 40px; border-radius: 12px; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 1.1rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .delete-btn { background: rgba(255, 82, 82, 0.9); }
+        .edit-btn { background: rgba(76, 175, 80, 0.9); }
+
+        .loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 9999; display: none;
+            align-items: center; justify-content: center; color: white; flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="loading-overlay" id="loader">
+        <i class="fa fa-spinner fa-spin fa-3x"></i>
+        <p style="margin-top:15px; font-weight: bold;">جاري المزامنة السحابية...</p>
+    </div>
+
+    <header class="header-banner">
+        <a href="dashboard.html" style="position: absolute; top: 20px; right: 20px; color: white; background: rgba(255,255,255,0.1); width: 45px; height: 45px; border-radius: 15px; display: flex; align-items: center; justify-content: center; text-decoration: none;"><i class="fa fa-arrow-right"></i></a>
+        <h1 style="margin: 0; font-weight: 900;">ساحة الإعلانات</h1>
+        <p>فوج المستقبل - بوقيرات</p>
+    </header>
+
+    <div class="container">
+        <div class="post-box">
+            <h3 id="formTitle" style="margin-top:0; color: var(--primary-light);"><i class="fa fa-pen-nib"></i> إنشاء إعلان جديد</h3>
+            
+            <input type="text" id="annTitle" class="input-style" placeholder="عنوان الإعلان...">
+            
+            <input type="text" id="annActivityTime" class="input-style" placeholder="تاريخ ووقت الرحلة (كتابة يدوية: 123)...">
+            
+            <textarea id="annDesc" class="input-style" rows="4" placeholder="اكتب تفاصيل الإعلان هنا..."></textarea>
+            
+            <div class="upload-area" onclick="document.getElementById('imageInput').click()">
+                <i class="fa fa-image"></i>
+                <span>إرفاق / تغيير الصورة</span>
+                <img id="previewImg">
+            </div>
+            <input type="file" id="imageInput" hidden accept="image/*" onchange="handleImage(this)">
+
+            <button class="btn-publish" id="submitBtn" onclick="uploadAnnouncement()">نشر الآن</button>
+            <button id="cancelEdit" class="btn-publish" style="background:#777; margin-top:10px; display:none;" onclick="resetForm()">إلغاء التعديل</button>
+        </div>
+
+        <div id="announcementsFeed"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC8khplhXDGXO490NJbBbULrjOYxsHnsVw",
+            authDomain: "mosta9bl-bouguirat.firebaseapp.com",
+            projectId: "mosta9bl-bouguirat",
+            storageBucket: "mosta9bl-bouguirat.firebasestorage.app",
+            messagingSenderId: "685256422068",
+            appId: "1:685256422068:web:f7951128a115d2e7f91de1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let currentImageBase64 = "";
+        let editModeId = null;
+        const userName = sessionStorage.getItem('userName') || "قائد";
+        const permissions = sessionStorage.getItem('permissions');
+
+        // تنسيق وقت النشر التلقائي بالأرقام 123
+        const formatPublishedDate = (ts) => {
+            const d = new Date(ts);
+            return d.toLocaleString('en-GB', { 
+                day: '2-digit', month: '2-digit', year: 'numeric', 
+                hour: '2-digit', minute: '2-digit', hour12: false 
+            });
+        };
+
+        window.handleImage = (input) => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentImageBase64 = e.target.result;
+                    const preview = document.getElementById('previewImg');
+                    preview.src = currentImageBase64;
+                    preview.style.display = "block";
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.uploadAnnouncement = async () => {
+            const title = document.getElementById('annTitle').value;
+            const desc = document.getElementById('annDesc').value;
+            const actTime = document.getElementById('annActivityTime').value;
+
+            if(!title || !desc) { alert("يرجى ملء الحقول الأساسية!"); return; }
+
+            document.getElementById('loader').style.display = "flex";
+
+            try {
+                const postData = {
+                    title: title,
+                    desc: desc,
+                    activityTime: actTime, // سيتم حفظ النص كما كتبته يدوياً
+                    image: currentImageBase64,
+                    timestamp: new Date().getTime(),
+                    author: userName
+                };
+
+                if(editModeId) {
+                    await updateDoc(doc(db, "announcements", editModeId), postData);
+                    alert("تم التعديل بنجاح.");
+                } else {
+                    await addDoc(collection(db, "announcements"), postData);
+                    alert("تم النشر بنجاح.");
+                }
+                resetForm();
+            } catch (e) {
+                alert("خطأ في المزامنة!");
+            } finally {
+                document.getElementById('loader').style.display = "none";
+            }
+        };
+
+        window.startEdit = (id, t, d, img, actT) => {
+            editModeId = id;
+            document.getElementById('annTitle').value = t;
+            document.getElementById('annDesc').value = d;
+            document.getElementById('annActivityTime').value = actT || "";
+            currentImageBase64 = img;
+            if(img) {
+                const p = document.getElementById('previewImg');
+                p.src = img; p.style.display = "block";
+            }
+            document.getElementById('formTitle').innerText = "تعديل الإعلان";
+            document.getElementById('submitBtn').innerText = "حفظ التعديل";
+            document.getElementById('cancelEdit').style.display = "block";
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        };
+
+        window.resetForm = () => {
+            editModeId = null;
+            document.getElementById('annTitle').value = "";
+            document.getElementById('annDesc').value = "";
+            document.getElementById('annActivityTime').value = "";
+            document.getElementById('previewImg').style.display = "none";
+            currentImageBase64 = "";
+            document.getElementById('formTitle').innerText = "إنشاء إعلان جديد";
+            document.getElementById('submitBtn').innerText = "نشر الآن";
+            document.getElementById('cancelEdit').style.display = "none";
+        };
+
+        onSnapshot(query(collection(db, "announcements"), orderBy("timestamp", "desc")), (snapshot) => {
+            const feed = document.getElementById('announcementsFeed');
+            feed.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const id = docSnap.id;
+                
+                feed.innerHTML += `
+                    <div class="announcement-card">
+                        <div class="controls-overlay">
+                            ${permissions === 'full' ? `
+                                <button class="control-btn edit-btn" onclick="startEdit('${id}', \`${data.title}\`, \`${data.desc}\`, '${data.image || ""}', '${data.activityTime || ""}')"><i class="fa fa-edit"></i></button>
+                                <button class="control-btn delete-btn" onclick="deleteAnnouncement('${id}')"><i class="fa fa-trash"></i></button>
+                            ` : ''}
+                        </div>
+                        ${data.image ? `<img src="${data.image}">` : ''}
+                        <div class="card-body">
+                            <div class="card-meta">
+                                <div class="meta-item"><i class="fa fa-user-circle"></i> ${data.author}</div>
+                                <div class="meta-item"><i class="fa fa-clock"></i> ${formatPublishedDate(data.timestamp)}</div>
+                                ${data.activityTime ? `<div class="meta-item" style="color:var(--primary-light); font-weight:bold;"><i class="fa fa-calendar-check"></i> ${data.activityTime}</div>` : ''}
+                            </div>
+                            <h2 class="card-title">${data.title}</h2>
+                            <p class="card-text">${data.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        });
+
+        window.deleteAnnouncement = async (id) => { if(confirm("هل تريد حذف هذا الإعلان؟")) await deleteDoc(doc(db, "announcements", id)); };
+    </script>
+</body>
+</html>
